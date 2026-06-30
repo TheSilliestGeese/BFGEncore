@@ -199,12 +199,18 @@ func putValue(obj *data.GFSObject, key string, v any) {
 		}
 	case string:
 		obj.PutUtfString(key, val)
-	default:
-		if b, err := json.Marshal(val); err == nil {
-			obj.PutUtfString(key, string(b))
-		} else {
-			obj.PutUtfString(key, fmt.Sprint(val))
+	case map[string]any:
+		sub := data.MakeGFSObject()
+		putValues(sub, val)
+		obj.PutGFSObject(key, sub)
+	case []any:
+		arr := data.MakeGFSArray()
+		for _, item := range val {
+			addValue(arr, item)
 		}
+		obj.PutGFSArray(key, arr)
+	default:
+		obj.PutUtfString(key, fmt.Sprint(val))
 	}
 }
 

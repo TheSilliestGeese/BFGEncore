@@ -143,6 +143,7 @@ func (m *Manager) HandleAck(commands ...string) {
 
 type PlayerHandlerFunc func(*Context, *Player)
 
+// checks for player, writes save
 func (m *Manager) HandlePlayer(command string, fn PlayerHandlerFunc) {
 	m.HandleWrite(command, func(ctx *Context) {
 		if p := ctx.Player(); p != nil {
@@ -151,6 +152,7 @@ func (m *Manager) HandlePlayer(command string, fn PlayerHandlerFunc) {
 	})
 }
 
+// checks for player, does not write
 func (m *Manager) HandlePlayerRead(command string, fn PlayerHandlerFunc) {
 	m.Handle(command, func(ctx *Context) {
 		if p := ctx.Player(); p != nil {

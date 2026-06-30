@@ -332,7 +332,7 @@ func registerStructureHandlers(m *Manager) {
 		m.Push(p.BBBID, "gs_clear_obstacle", obstacleClearedPayload(p, usid))
 	})
 
-	m.HandlePlayerRead("gs_collect_from_mine", func(ctx *Context, p *Player) {
+	m.HandlePlayer("gs_collect_from_mine", func(ctx *Context, p *Player) {
 		island := ctx.Island()
 		var mineStructure *Structure
 		for _, s := range island.Structures {
@@ -345,6 +345,8 @@ func registerStructureHandlers(m *Manager) {
 			ctx.Reply("gs_collect_from_mine", data.MakeGFSObject().PutLong("success", 0))
 			return
 		}
+
+		// TODO:
 		// Timer does not reset for some reason, but at least the game does not crash
 		now := nowMS()
 		mine := static.MineInfo[int(mineStructure.StructureID)]

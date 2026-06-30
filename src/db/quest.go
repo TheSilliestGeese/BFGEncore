@@ -25,17 +25,30 @@ import (
 
 func addValue(arr *data.GFSArray, v any) {
 	switch x := v.(type) {
+	case bool:
+		arr.AddBool(x)
 	case json.Number:
 		if isIntNumber(x) {
 			i, _ := x.Int64()
 			arr.AddInt(int(i))
 		} else {
-			arr.AddUtfString(string(x))
+			f, _ := x.Float64()
+			arr.AddDouble(f)
 		}
 	case string:
 		arr.AddUtfString(x)
+	case map[string]any:
+		sub := data.MakeGFSObject()
+		putValues(sub, x)
+		arr.AddSFSObject(sub)
+	case []any:
+		nested := data.MakeGFSArray()
+		for _, item := range x {
+			addValue(nested, item)
+		}
+		arr.AddSFSArray(nested)
 	default:
-		arr.AddUtfString(fmt.Sprint(v))
+		arr.AddUtfString(fmt.Sprint(x))
 	}
 }
 
