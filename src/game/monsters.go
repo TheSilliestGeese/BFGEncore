@@ -137,12 +137,12 @@ func registerMonsterHandlers(m *Manager) {
 			ctx.Fail("gs_speed_up_hatching", "Error")
 			return
 		}
-		now := nowMS()
-		minutesRemaining := (egg.HatchesOn - now) / 1000 / 60
-		diamonds := (minutesRemaining + 59) / 60
-		if !p.Buy(0, int64(diamonds), 0) {
-			return
+
+		if !p.Buy(0, m.calculateSpeedupCost(p, userEggID, "egg"), 0) {
+			ctx.Fail("gs_speed_up_hatching", "Not Enough Diamonds!")
 		}
+
+		now := nowMS()
 		egg.HatchesOn = now
 		ctx.Reply("gs_speed_up_hatching", data.MakeGFSObject().
 			PutLong("success", 1).
@@ -234,9 +234,9 @@ func registerMonsterHandlers(m *Manager) {
 		if !ok {
 			return
 		}
-		if !p.Buy(int64(info.CostCoins), int64(info.CostDiamonds), int64(info.CostEth)) {
-			return
-		}
+		// if !p.Buy(int64(info.CostCoins), 0, int64(info.CostEth)) {
+		// 	return
+		// }
 		now := nowMS()
 		endTime := now + int64(info.BuildTime)*1000
 		island.RemoveBreeding(userBreedingID)
@@ -269,13 +269,20 @@ func registerMonsterHandlers(m *Manager) {
 			ctx.Fail("gs_speed_up_breeding", "Error")
 			return
 		}
+
+		cost := m.calculateSpeedupCost(p, userBreedingID, "breeding")
+		if !p.Buy(0, cost, 0) {
+			ctx.Fail("gs_speed_up_breeding", "Not Enough Diamonds!")
+		}
+
 		now := nowMS()
 		breeding.CompleteOn = now
 		ctx.Reply("gs_speed_up_breeding", data.MakeGFSObject().
 			PutLong("success", 1).
 			PutLong("userBreedingId", userBreedingID).
 			PutLong("complete_on", now).
-			PutLong("started_on", breeding.StartedOn))
+			PutLong("started_on", breeding.StartedOn).
+			PutGFSArray("properties", p.GetProperties()))
 	})
 
 	m.HandlePlayer("gs_move_monster", func(ctx *Context, p *Player) {

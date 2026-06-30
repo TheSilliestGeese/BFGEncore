@@ -20,6 +20,7 @@ package game
 import (
 	"fmt"
 	"log"
+	"math"
 	"sync"
 	"time"
 
@@ -190,4 +191,24 @@ func (m *Manager) rearmUpgradeTimers() {
 	if armed > 0 || finished > 0 {
 		log.Printf("upgrades on load: %d re-armed, %d finished immediately", armed, finished)
 	}
+}
+
+func (m *Manager) calculateSpeedupCost(p *Player, id int64, kind string) int64 {
+	minutes := 0
+
+	switch kind {
+	case "structure":
+		s := p.findStructure(id)
+		minutes = int(((s.BuildingCompleted - s.DateCreated) / 1000) / 60)
+	case "baking":
+		b := p.GetActiveIsland().FindBaking(id)
+		minutes = int(((b.CompleteOn - b.StartedOn) / 1000) / 60)
+	case "egg":
+		e := p.GetActiveIsland().FindEgg(id)
+		minutes = int(((e.HatchesOn - e.LaidOn) / 1000) / 60)
+	case "breeding":
+		b := p.GetActiveIsland().FindBreeding(id)
+		minutes = int(((b.CompleteOn - b.StartedOn) / 1000) / 60)
+	}
+	return int64(math.Ceil(float64(minutes) / 60.0))
 }

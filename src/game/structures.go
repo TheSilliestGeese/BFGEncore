@@ -221,6 +221,11 @@ func registerStructureHandlers(m *Manager) {
 			ctx.Fail("gs_speed_up_structure", "Structure not found")
 			return
 		}
+
+		if !p.Buy(0, m.calculateSpeedupCost(p, usid, "structure"), 0) {
+			ctx.Fail("gs_speed_up_structure", "Not enough diamonds!")
+		}
+
 		wasUpgrade := s.UpgradeTo != 0
 		m.finishUpgradeNow(p, s)
 
@@ -325,6 +330,11 @@ func registerStructureHandlers(m *Manager) {
 			ctx.Fail("gs_clear_obstacle_speed_up", "Invalid structure ID")
 			return
 		}
+
+		if !p.Buy(0, m.calculateSpeedupCost(p, usid, "structure"), 0) {
+			ctx.Fail("gs_clear_obstacle_speed_up", "Not enough diamonds!")
+		}
+
 		m.CancelTimer(clearObstacleKey(p.BBBID, usid))
 		m.removeObstacle(p, usid)
 

@@ -88,6 +88,10 @@ func registerBakingHandlers(m *Manager) {
 			return
 		}
 
+		if !p.Buy(0, m.calculateSpeedupCost(p, bakingID, "baking"), 0) {
+			ctx.Fail("gs_speed_up_baking", "Not enough diamonds!")
+		}
+
 		now := nowMS()
 		baking.CompleteOn = now
 
