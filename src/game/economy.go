@@ -24,18 +24,6 @@ import (
 )
 
 func registerEconomyHandlers(m *Manager) {
-	m.HandleWrite("gs_currency_conversion", func(ctx *Context) {
-		p := ctx.Player()
-		if p == nil {
-			return
-		}
-		if !p.AddProperties(0, -50, 0, 0, 0) {
-			return
-		}
-		p.AddProperties(1_000_000, 0, 0, 0, 0)
-		ctx.Reply("gs_update_properties", data.MakeGFSObject().PutGFSArray("properties", p.GetProperties()))
-	})
-
 	m.HandleReply("gs_player_has_scratch_off", func(ctx *Context) *data.GFSObject {
 		return data.MakeGFSObject().PutBool("success", false)
 	})
@@ -206,6 +194,31 @@ func registerEconomyHandlers(m *Manager) {
 			PutLong("user_monster_id", umid).
 			PutLong("user_parent_island_id", parentIslandID).
 			PutGFSObject("monster", giMonster.GetSFSObject(goldIsland.UserIslandID)))
+	})
+
+	// currency conversions
+	m.HandlePlayer("gs_currency_conversion", func(ctx *Context, p *Player) {
+		if !p.AddProperties(0, -50, 0, 0, 0) {
+			return
+		}
+		p.AddProperties(1_000_000, 0, 0, 0, 0)
+		ctx.Reply("gs_update_properties", data.MakeGFSObject().PutGFSArray("properties", p.GetProperties()))
+	})
+
+	m.HandlePlayer("gs_currency_diamonds2eth_conversion", func(ctx *Context, p *Player) {
+		if !p.AddProperties(0, -50, 0, 0, 0) {
+			return
+		}
+		p.AddProperties(0, 0, 0, 0, 100)
+		ctx.Reply("gs_update_properties", data.MakeGFSObject().PutGFSArray("properties", p.GetProperties()))
+	})
+
+	m.HandlePlayer("gs_currency_coins2eth_conversion", func(ctx *Context, p *Player) {
+		if !p.AddProperties(-500_000, 0, 0, 0, 0) {
+			return
+		}
+		p.AddProperties(0, 0, 0, 0, 50)
+		ctx.Reply("gs_update_properties", data.MakeGFSObject().PutGFSArray("properties", p.GetProperties()))
 	})
 
 	// success + the player's current properties (for some reason)
