@@ -13,10 +13,12 @@ GOOS=windows GOARCH=amd64 go build -o ../builds/windows/setup.exe ./cmd/setup/
 cp -r ../db ../builds/linux/db
 cp ../README.md ../builds/linux/README.md
 cp ../LICENSE ../builds/linux/LICENSE
+cp ../constants.json ../builds/linux/constants.json
 
 cp -r ../db ../builds/windows/db
 cp ../README.md ../builds/windows/README.md
 cp ../LICENSE ../builds/windows/LICENSE
+cp ../constants.json ../builds/windows/constants.json
 
 zip -r ../builds/linux-bin.zip ../builds/linux/
 zip -r ../builds/windows-bin.zip ../builds/windows/
