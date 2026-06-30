@@ -57,6 +57,8 @@ type StaticData struct {
 
 	MineInfo     map[int]MineInfo
 	TeleportInfo map[[2]int]TeleportDest
+
+	Constants Constants
 }
 
 func LoadStatic(db *DB) *StaticData {

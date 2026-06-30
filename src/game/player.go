@@ -58,16 +58,17 @@ type Player struct {
 }
 
 func newPlayer(bbbID, userID int64, static *db.StaticData) *Player {
+	c := static.Constants
 	p := &Player{
 		BBBID:        bbbID,
 		UserID:       userID,
 		DisplayName:  "New Player",
-		Coins:        750_000_000,
-		Diamonds:     1_000_000,
-		Food:         250_000_000,
-		XP:           0,
-		Shards:       100_000_000,
-		Level:        1, // otherwise you get softlocked in tutorial cuz quest system still needs work
+		Coins:        c.StartingCoins,
+		Diamonds:     c.StartingDiamonds,
+		Food:         c.StartingFood,
+		XP:           c.StartingXP,
+		Shards:       c.StartingShards,
+		Level:        c.StartingLevel,
 		ActiveIsland: 1,
 		levelXP:      static.LevelXP,
 	}

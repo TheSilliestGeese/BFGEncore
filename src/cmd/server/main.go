@@ -75,6 +75,15 @@ func main() {
 		log.Fatalf("open game data: %v", err)
 	}
 	static := db.LoadStatic(database)
+	constantsPath := cfg.ConstantsPath
+	if constantsPath == "" {
+		constantsPath = "./constants.json"
+	}
+	consts, err := db.LoadConstants(constantsPath)
+	if err != nil {
+		log.Fatalf("load constants: %v", err)
+	}
+	static.Constants = consts
 	log.Printf("static data: %d genes, %d islands, %d monsters, %d structures, %d levels, %d store items",
 		static.Genes.Size(), static.Islands.Size(), static.Monsters.Size(),
 		static.Structures.Size(), static.Levels.Size(), static.StoreItems.Size())

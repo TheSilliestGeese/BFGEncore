@@ -15,36 +15,46 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
+package db
 
 import (
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"os"
 )
 
-type config struct {
-	Key        string `json:"key"`
-	IV         string `json:"iv"`
-	MaxPlayers int    `json:"max_players"`
-	ServerIP   string `json:"server_ip"`
-
-	GameAddr      string `json:"game_addr"`
-	AuthAddr      string `json:"auth_addr"`
-	DBPath        string `json:"db_path"`
-	SavePath      string `json:"save_path"`
-	DLCPath       string `json:"dlc_path"`
-	UsersPath     string `json:"users_path"`
-	LogPath       string `json:"log_path"`
-	ConstantsPath string `json:"constants_path"`
-	RefreshLog    bool   `json:"refresh_log"`
-	Debug         bool   `json:"debug"`
+type Constants struct {
+	StartingCoins    int64 `json:"starting_coins"`
+	StartingDiamonds int64 `json:"starting_diamonds"`
+	StartingFood     int64 `json:"starting_food"`
+	StartingXP       int64 `json:"starting_xp"`
+	StartingShards   int64 `json:"starting_shards"`
+	StartingLevel    int   `json:"starting_level"`
 }
 
-func loadConfig(path string) (config, error) {
-	var c config
-	raw, err := os.ReadFile(path)
-	if err != nil {
-		return c, err
+func DefaultConstants() Constants {
+	return Constants{
+		StartingCoins:    750_000_000,
+		StartingDiamonds: 1_000_000,
+		StartingFood:     250_000_000,
+		StartingXP:       0,
+		StartingShards:   100_000_000,
+		StartingLevel:    1,
 	}
-	return c, json.Unmarshal(raw, &c)
+}
+
+func LoadConstants(path string) (Constants, error) {
+	raw, err := os.ReadFile(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return DefaultConstants(), nil
+	}
+	if err != nil {
+		return DefaultConstants(), err
+	}
+	var c Constants
+	if err := json.Unmarshal(raw, &c); err != nil {
+		return DefaultConstants(), err
+	}
+	return c, nil
 }
