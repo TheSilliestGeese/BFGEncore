@@ -98,7 +98,7 @@ func registerMonsterHandlers(m *Manager) {
 			Flip:           flip,
 			Level:          1,
 			Happiness:      0,
-			Volume:         0.5,
+			Volume:         1,
 			Name:           "Monster",
 			DateCreated:    now,
 			LastCollection: now,
