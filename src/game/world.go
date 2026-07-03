@@ -66,38 +66,26 @@ func (s *Structure) GetSFSObject() *data.GFSObject {
 }
 
 type Monster struct {
-	UserMonsterID  int64
-	UserIslandID   int64
-	MonsterID      int64
-	X              int
-	Y              int
-	Flip           int
-	Level          int
-	Happiness      int
-	CollectedCoins int
-	TimesFed       int
-	Volume         float64
-	Muted          int
-	Name           string
-	DateCreated    int64
-	LastCollection int64
-	MegaPerma      bool
-	MegaCurrent    int
-	MegaStart      int64
-	MegaFinish     int64
-}
-
-type GoldMonster struct {
-	UserMonsterID   int64   `json:"user_monster_id"`
-	ParentMonsterID int64   `json:"parent_monster_id"`
-	MonsterID       int64   `json:"monster_id"`
-	X               int     `json:"pos_x"`
-	Y               int     `json:"pos_y"`
-	Flip            int     `json:"flip"`
-	Level           int     `json:"level"`
-	Name            string  `json:"name"`
-	Volume          float64 `json:"volume"`
-	Muted           int     `json:"muted"`
+	UserMonsterID   int64
+	UserIslandID    int64
+	MonsterID       int64
+	ParentMonsterID int64
+	X               int
+	Y               int
+	Flip            int
+	Level           int
+	Happiness       int
+	CollectedCoins  int
+	TimesFed        int
+	Volume          float64
+	Muted           int
+	Name            string
+	DateCreated     int64
+	LastCollection  int64
+	MegaPerma       bool
+	MegaCurrent     int
+	MegaStart       int64
+	MegaFinish      int64
 }
 
 func (m *Monster) GetSFSObject() *data.GFSObject {
@@ -130,19 +118,19 @@ func (m *Monster) GetSFSObject() *data.GFSObject {
 	return obj
 }
 
-func (gm *GoldMonster) GetSFSObject(islandID int64) *data.GFSObject {
+func (m *Monster) goldSFSObject(islandID int64) *data.GFSObject {
 	return data.MakeGFSObject().
-		PutLong("user_monster_id", gm.UserMonsterID).
+		PutLong("user_monster_id", m.UserMonsterID).
 		PutLong("user_island_id", islandID).
 		PutLong("island", islandID).
-		PutInt("monster", int(gm.MonsterID)).
-		PutInt("pos_x", gm.X).
-		PutInt("pos_y", gm.Y).
-		PutInt("flip", gm.Flip).
-		PutInt("level", gm.Level).
-		PutUtfString("name", gm.Name).
-		PutDouble("volume", gm.Volume).
-		PutInt("muted", gm.Muted).
+		PutInt("monster", int(m.MonsterID)).
+		PutInt("pos_x", m.X).
+		PutInt("pos_y", m.Y).
+		PutInt("flip", m.Flip).
+		PutInt("level", m.Level).
+		PutUtfString("name", m.Name).
+		PutDouble("volume", m.Volume).
+		PutInt("muted", m.Muted).
 		PutInt("times_fed", 0).
 		PutInt("happiness", 0).
 		PutInt("collected_coins", 0).
@@ -236,7 +224,7 @@ type Island struct {
 	Dislikes     int
 	WarpSpeed    float64
 	Structures   []*Structure
-	GoldMonsters []*GoldMonster `json:"gold_monsters,omitempty"` // Don't break older saves
+	GoldMonsters []*Monster `json:"gold_monsters,omitempty"` // Don't break older saves
 	Monsters     []*Monster
 	Eggs         []*Egg
 	Breedings    []*Breeding
@@ -274,8 +262,22 @@ func (i *Island) FindMonster(id int64) *Monster {
 	return find(i.Monsters, func(m *Monster) bool { return m.UserMonsterID == id })
 }
 
-func (i *Island) FindGoldMonster(id int64) *GoldMonster {
-	return find(i.GoldMonsters, func(m *GoldMonster) bool { return m.UserMonsterID == id })
+func (i *Island) FindGoldMonster(id int64) *Monster {
+	return find(i.GoldMonsters, func(m *Monster) bool { return m.UserMonsterID == id })
+}
+
+func (i *Island) monster(id int64) *Monster {
+	if i.IsGold() {
+		return i.FindGoldMonster(id)
+	}
+	return i.FindMonster(id)
+}
+
+func (i *Island) monsterSFS(m *Monster) *data.GFSObject {
+	if i.IsGold() {
+		return m.goldSFSObject(i.UserIslandID)
+	}
+	return m.GetSFSObject()
 }
 
 func (i *Island) FindEgg(id int64) *Egg {
@@ -338,7 +340,7 @@ func (i *Island) GetSFSObject() *data.GFSObject {
 	giMappings := data.MakeGFSArray()
 	if i.IsGold() {
 		for _, gm := range i.GoldMonsters {
-			monsters.AddSFSObject(gm.GetSFSObject(i.UserIslandID))
+			monsters.AddSFSObject(gm.goldSFSObject(i.UserIslandID))
 			giMappings.AddSFSObject(data.MakeGFSObject().
 				PutLong("user_monster", gm.ParentMonsterID).
 				PutLong("user_gi_monster", gm.UserMonsterID))

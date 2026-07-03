@@ -175,7 +175,7 @@ func registerEconomyHandlers(m *Manager) {
 			return
 		}
 
-		giMonster := &GoldMonster{
+		giMonster := &Monster{
 			UserMonsterID:   p.NextMonsterID(),
 			ParentMonsterID: umid,
 			MonsterID:       mon.MonsterID,
@@ -193,7 +193,7 @@ func registerEconomyHandlers(m *Manager) {
 			PutLong("success", 1).
 			PutLong("user_monster_id", umid).
 			PutLong("user_parent_island_id", parentIslandID).
-			PutGFSObject("monster", giMonster.GetSFSObject(goldIsland.UserIslandID)))
+			PutGFSObject("monster", giMonster.goldSFSObject(goldIsland.UserIslandID)))
 	})
 
 	// currency conversions

@@ -288,61 +288,28 @@ func registerMonsterHandlers(m *Manager) {
 	m.HandlePlayer("gs_move_monster", func(ctx *Context, p *Player) {
 		island := ctx.Island()
 		umid := ctx.Int64("user_monster_id")
-
-		var x, y int
-		var volume float64
-
-		if island.IsGold() {
-			goldMon := island.FindGoldMonster(umid)
-			if goldMon == nil {
-				ctx.Fail("gs_move_monster", "Invalid monster ID")
-				return
-			}
-			goldMon.X = ctx.Int("pos_x")
-			goldMon.Y = ctx.Int("pos_y")
-			goldMon.Volume = ctx.Float("volume")
-			x, y, volume = goldMon.X, goldMon.Y, goldMon.Volume
-		} else {
-			mon := island.FindMonster(umid)
-			if mon == nil {
-				ctx.Fail("gs_move_monster", "Invalid monster ID")
-				return
-			}
-			mon.X = ctx.Int("pos_x")
-			mon.Y = ctx.Int("pos_y")
-			mon.Volume = ctx.Float("volume")
-			x, y, volume = mon.X, mon.Y, mon.Volume
+		mon := island.monster(umid)
+		if mon == nil {
+			ctx.Fail("gs_move_monster", "Invalid monster ID")
+			return
 		}
+		mon.X = ctx.Int("pos_x")
+		mon.Y = ctx.Int("pos_y")
+		mon.Volume = ctx.Float("volume")
 
-		ctx.Reply("gs_move_monster", data.MakeGFSObject().PutBool("success", true).PutInt("pos_x", x).PutInt("pos_y", y))
+		ctx.Reply("gs_move_monster", data.MakeGFSObject().PutBool("success", true).PutInt("pos_x", mon.X).PutInt("pos_y", mon.Y))
 		ctx.Reply("gs_update_monster", data.MakeGFSObject().
 			PutLong("user_monster_id", umid).
-			PutInt("pos_x", x).
-			PutInt("pos_y", y).
-			PutDouble("volume", volume).
+			PutInt("pos_x", mon.X).
+			PutInt("pos_y", mon.Y).
+			PutDouble("volume", mon.Volume).
 			PutGFSArray("properties", p.GetProperties()))
 	})
 
 	m.HandlePlayer("gs_flip_monster", func(ctx *Context, p *Player) {
 		island := ctx.Island()
 		umid := ctx.Int64("user_monster_id")
-
-		if island.IsGold() {
-			gm := island.FindGoldMonster(umid)
-			if gm == nil {
-				ctx.Fail("gs_mute_monster", "Invalid monster ID")
-				return
-			}
-			gm.Flip = boolInt(gm.Flip == 0)
-			ctx.Reply("gs_flip_monster", data.MakeGFSObject().PutBool("success", true))
-			ctx.Reply("gs_update_monster", data.MakeGFSObject().
-				PutBool("success", true).
-				PutLong("user_monster_id", umid).
-				PutGFSObject("monster", gm.GetSFSObject(island.UserIslandID)).
-				PutInt("flip", gm.Flip))
-		}
-
-		mon := island.FindMonster(umid)
+		mon := island.monster(umid)
 		if mon == nil {
 			ctx.Fail("gs_flip_monster", "Invalid monster ID")
 			return
@@ -353,29 +320,13 @@ func registerMonsterHandlers(m *Manager) {
 			PutBool("success", true).
 			PutLong("user_monster_id", umid).
 			PutInt("flip", mon.Flip).
-			PutGFSObject("monster", mon.GetSFSObject()))
+			PutGFSObject("monster", island.monsterSFS(mon)))
 	})
 
 	m.HandlePlayer("gs_mute_monster", func(ctx *Context, p *Player) {
 		island := ctx.Island()
 		umid := ctx.Int64("user_monster_id")
-
-		if island.IsGold() {
-			gm := island.FindGoldMonster(umid)
-			if gm == nil {
-				ctx.Fail("gs_mute_monster", "Invalid monster ID")
-				return
-			}
-			gm.Muted = boolInt(gm.Muted == 0)
-			ctx.Reply("gs_mute_monster", data.MakeGFSObject().PutBool("success", true))
-			ctx.Reply("gs_update_monster", data.MakeGFSObject().
-				PutBool("success", true).
-				PutLong("user_monster_id", umid).
-				PutGFSObject("monster", gm.GetSFSObject(island.UserIslandID)).
-				PutInt("muted", gm.Muted))
-		}
-
-		mon := island.FindMonster(umid)
+		mon := island.monster(umid)
 		if mon == nil {
 			ctx.Fail("gs_mute_monster", "Invalid monster ID")
 			return
@@ -385,7 +336,7 @@ func registerMonsterHandlers(m *Manager) {
 		ctx.Reply("gs_update_monster", data.MakeGFSObject().
 			PutBool("success", true).
 			PutLong("user_monster_id", umid).
-			PutGFSObject("monster", mon.GetSFSObject()).
+			PutGFSObject("monster", island.monsterSFS(mon)).
 			PutInt("muted", mon.Muted))
 	})
 
@@ -534,31 +485,19 @@ func registerMonsterHandlers(m *Manager) {
 	m.HandlePlayer("gs_sell_monster", func(ctx *Context, p *Player) {
 		island := ctx.Island()
 		umid := ctx.Int64("user_monster_id")
-
-		if island.IsGold() {
-			for i, gm := range island.GoldMonsters {
-				if gm.UserMonsterID == umid {
-					island.GoldMonsters = append(island.GoldMonsters[:i], island.GoldMonsters[i+1:]...)
-					ctx.Reply("gs_sell_monster", data.MakeGFSObject().
-						PutBool("success", true).
-						PutLong("user_monster_id", umid).
-						PutGFSArray("properties", p.GetProperties()))
-					return
-				}
-			}
-			ctx.Fail("gs_sell_monster", "Invalid monster ID")
-			return
-		}
-
-		mon := island.FindMonster(umid)
+		mon := island.monster(umid)
 		if mon == nil {
 			ctx.Fail("gs_sell_monster", "Invalid monster ID")
 			return
 		}
-		if info, ok := static.Monster(int(mon.MonsterID)); ok {
-			p.AddProperties(int64(info.CostCoins*3/4), 0, 0, 0, 0)
+		if island.IsGold() {
+			island.GoldMonsters = remove(island.GoldMonsters, func(m *Monster) bool { return m.UserMonsterID == umid })
+		} else {
+			if info, ok := static.Monster(int(mon.MonsterID)); ok {
+				p.AddProperties(int64(info.CostCoins*3/4), 0, 0, 0, 0)
+			}
+			island.RemoveMonster(umid)
 		}
-		island.RemoveMonster(umid)
 		ctx.Reply("gs_sell_monster", data.MakeGFSObject().
 			PutBool("success", true).
 			PutLong("user_monster_id", umid).
