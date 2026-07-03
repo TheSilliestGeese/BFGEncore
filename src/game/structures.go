@@ -265,17 +265,9 @@ func registerStructureHandlers(m *Manager) {
 	m.HandlePlayer("gs_clear_obstacle", func(ctx *Context, p *Player) {
 		island := ctx.Island()
 		usid := ctx.Int64("user_structure_id")
-		s := island.FindStructure(usid)
-		if s == nil {
+		if island.FindStructure(usid) == nil {
 			ctx.Fail("gs_clear_obstacle", "Invalid structure ID")
 			return
-		}
-
-		if info, ok := static.Structure(int(s.StructureID)); ok && s.IsComplete != 0 {
-			if !p.BuyInIsland(int64(info.CostCoins), int64(info.CostDiamonds), int64(info.CostEth), island) {
-				ctx.Fail("gs_clear_obstacle", "Not enough resources to clear obstacle")
-				return
-			}
 		}
 		m.CancelTimer(clearObstacleKey(p.BBBID, usid))
 		m.removeObstacle(p, usid)
