@@ -272,7 +272,7 @@ func registerStructureHandlers(m *Manager) {
 		}
 
 		if info, ok := static.Structure(int(s.StructureID)); ok && s.IsComplete != 0 {
-			if !p.Buy(int64(info.CostCoins), int64(info.CostDiamonds), int64(info.CostEth)) {
+			if !p.BuyInIsland(int64(info.CostCoins), int64(info.CostDiamonds), int64(info.CostEth), island) {
 				ctx.Fail("gs_clear_obstacle", "Not enough resources to clear obstacle")
 				return
 			}
@@ -292,7 +292,7 @@ func registerStructureHandlers(m *Manager) {
 		}
 		info, ok := static.Structure(int(s.StructureID))
 		if ok {
-			if !p.Buy(int64(info.CostCoins), int64(info.CostDiamonds), int64(info.CostEth)) {
+			if !p.BuyInIsland(int64(info.CostCoins), int64(info.CostDiamonds), int64(info.CostEth), island) {
 				ctx.Fail("gs_start_obstacle", "Not enough resources to clear obstacle")
 				return
 			}
