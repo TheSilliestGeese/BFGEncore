@@ -26,13 +26,15 @@ type breedCombo struct {
 
 func loadBreedingCombos(db *DB) map[[2]int][]breedCombo {
 	out := map[[2]int][]breedCombo{}
-	for _, r := range db.Breeding {
-		a, b := r.Monster1, r.Monster2
+	for _, e := range db.Breeding {
+		a, b := e.Monsters[0], e.Monsters[1]
 		if a > b {
 			a, b = b, a
 		}
 		key := [2]int{a, b}
-		out[key] = append(out[key], breedCombo{Result: r.Result, Probability: r.Probability})
+		for _, r := range e.Results {
+			out[key] = append(out[key], breedCombo{Result: r[0], Probability: r[1]})
+		}
 	}
 	for key, combos := range out {
 		for i := 1; i < len(combos); i++ {

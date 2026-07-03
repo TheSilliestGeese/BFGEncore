@@ -144,10 +144,8 @@ type MonsterLevelRow struct {
 }
 
 type BreedingCombo struct {
-	Monster1    int `json:"monster_1"`
-	Monster2    int `json:"monster_2"`
-	Result      int `json:"result"`
-	Probability int `json:"probability"`
+	Monsters [2]int   `json:"monsters"`
+	Results  [][2]int `json:"results"`
 }
 
 type Quest struct {
