@@ -88,8 +88,7 @@ func registerLoginHandlers(m *Manager) {
 	m.Handle("gs_quest", func(ctx *Context) {
 		p := ctx.Player()
 		if p == nil {
-			ctx.Reply("gs_quest", contentResponse("result", static.Quests))
-			return
+			p = &Player{}
 		}
 		ctx.Reply("gs_quest", contentResponse("result", m.questListFor(p)))
 	})

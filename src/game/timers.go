@@ -140,8 +140,8 @@ func (m *Manager) removeObstacle(p *Player, userStructureID int64) {
 		}
 		isl.RemoveStructure(userStructureID)
 		p.bumpCounter("obstacle_removed")
-		if info, ok := m.Static.StructureBuy[int(s.StructureID)]; ok && info.Xp > 0 {
-			p.AddProperties(0, 0, 0, int64(info.Xp), 0)
+		if info, ok := m.Static.Structure(int(s.StructureID)); ok && info.XP > 0 {
+			p.AddProperties(0, 0, 0, int64(info.XP), 0)
 		}
 		return
 	}

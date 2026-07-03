@@ -31,7 +31,8 @@ func registerBakingHandlers(m *Manager) {
 			ctx.Fail("gs_start_baking", "Invalid structure ID")
 			return
 		}
-		opts := static.FoodOptions[int(s.StructureID)]
+		si, _ := static.Structure(int(s.StructureID))
+		opts := si.Food
 		if foodIndex < 0 || foodIndex >= len(opts) {
 			ctx.Fail("gs_start_baking", "Invalid food option")
 			return

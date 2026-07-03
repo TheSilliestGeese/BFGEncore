@@ -28,7 +28,7 @@ func registerMonsterHandlers(m *Manager) {
 
 	m.HandlePlayer("gs_buy_egg", func(ctx *Context, p *Player) {
 		monsterID := ctx.Int("monster_id")
-		info, ok := static.MonsterBuy[monsterID]
+		info, ok := static.Monster(monsterID)
 		if !ok {
 			ctx.Fail("gs_buy_egg", "Unknown monster")
 			return
@@ -161,7 +161,7 @@ func registerMonsterHandlers(m *Manager) {
 			ctx.Fail("gs_sell_egg", "Egg not found")
 			return
 		}
-		if info, ok := static.MonsterBuy[int(egg.MonsterID)]; ok {
+		if info, ok := static.Monster(int(egg.MonsterID)); ok {
 			if island.IsEthereal() {
 				p.AddProperties(0, 0, 0, 0, int64(info.CostEth*3/4))
 			} else {
@@ -198,7 +198,7 @@ func registerMonsterHandlers(m *Manager) {
 		}
 
 		result := static.BreedingResult(int(m1.MonsterID), int(m2.MonsterID), m1.Level, m2.Level, p.Level)
-		info, ok := static.MonsterBuy[result]
+		info, ok := static.Monster(result)
 		if !ok {
 			ctx.Fail("gs_breed_monsters", "Breeding result not found")
 			return
@@ -231,7 +231,7 @@ func registerMonsterHandlers(m *Manager) {
 		if breeding == nil {
 			return
 		}
-		info, ok := static.MonsterBuy[breeding.NewMonster]
+		info, ok := static.Monster(breeding.NewMonster)
 		if !ok {
 			return
 		}
@@ -555,7 +555,7 @@ func registerMonsterHandlers(m *Manager) {
 			ctx.Fail("gs_sell_monster", "Invalid monster ID")
 			return
 		}
-		if info, ok := static.MonsterBuy[int(mon.MonsterID)]; ok {
+		if info, ok := static.Monster(int(mon.MonsterID)); ok {
 			p.AddProperties(int64(info.CostCoins*3/4), 0, 0, 0, 0)
 		}
 		island.RemoveMonster(umid)
@@ -626,7 +626,7 @@ func registerMonsterHandlers(m *Manager) {
 				PutUtfString("message", "Monster not found"))
 			return
 		}
-		dest, ok := static.TeleportInfo[[2]int{int(srcIsland.IslandID), int(mon.MonsterID)}]
+		dest, ok := static.Teleport(int(srcIsland.IslandID), int(mon.MonsterID))
 		if !ok {
 			ctx.Reply("gs_send_monster_home", data.MakeGFSObject().
 				PutLong("success", 0).
@@ -665,7 +665,7 @@ func registerMonsterHandlers(m *Manager) {
 				return
 			}
 		}
-		info, ok := static.MonsterBuy[dest.DestMonster]
+		info, ok := static.Monster(dest.DestMonster)
 		if !ok {
 			ctx.Reply("gs_send_monster_home", data.MakeGFSObject().
 				PutLong("success", 0).

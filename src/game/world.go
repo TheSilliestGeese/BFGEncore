@@ -243,121 +243,75 @@ type Island struct {
 	Bakings      []*Baking
 }
 
-func (i *Island) FindStructure(userStructureID int64) *Structure {
-	for _, s := range i.Structures {
-		if s.UserStructureID == userStructureID {
-			return s
+func find[T any](items []*T, match func(*T) bool) *T {
+	for _, it := range items {
+		if match(it) {
+			return it
 		}
 	}
 	return nil
+}
+
+func remove[T any](items []*T, match func(*T) bool) []*T {
+	out := items[:0]
+	for _, it := range items {
+		if !match(it) {
+			out = append(out, it)
+		}
+	}
+	return out
+}
+
+func (i *Island) FindStructure(id int64) *Structure {
+	return find(i.Structures, func(s *Structure) bool { return s.UserStructureID == id })
 }
 
 func (i *Island) FindStructureByType(structureID int64) *Structure {
-	for _, s := range i.Structures {
-		if s.StructureID == structureID {
-			return s
-		}
-	}
-	return nil
+	return find(i.Structures, func(s *Structure) bool { return s.StructureID == structureID })
 }
 
-func (i *Island) FindMonster(userMonsterID int64) *Monster {
-	for _, m := range i.Monsters {
-		if m.UserMonsterID == userMonsterID {
-			return m
-		}
-	}
-	return nil
+func (i *Island) FindMonster(id int64) *Monster {
+	return find(i.Monsters, func(m *Monster) bool { return m.UserMonsterID == id })
 }
 
-func (i *Island) FindGoldMonster(userMonsterID int64) *GoldMonster {
-	for _, m := range i.GoldMonsters {
-		if m.UserMonsterID == userMonsterID {
-			return m
-		}
-	}
-	return nil
+func (i *Island) FindGoldMonster(id int64) *GoldMonster {
+	return find(i.GoldMonsters, func(m *GoldMonster) bool { return m.UserMonsterID == id })
 }
 
-func (i *Island) FindEgg(userEggID int64) *Egg {
-	for _, e := range i.Eggs {
-		if e.UserEggID == userEggID {
-			return e
-		}
-	}
-	return nil
+func (i *Island) FindEgg(id int64) *Egg {
+	return find(i.Eggs, func(e *Egg) bool { return e.UserEggID == id })
 }
 
-func (i *Island) FindBreeding(userBreedingID int64) *Breeding {
-	for _, b := range i.Breedings {
-		if b.UserBreedingID == userBreedingID {
-			return b
-		}
-	}
-	return nil
+func (i *Island) FindBreeding(id int64) *Breeding {
+	return find(i.Breedings, func(b *Breeding) bool { return b.UserBreedingID == id })
+}
+
+func (i *Island) FindBaking(id int64) *Baking {
+	return find(i.Bakings, func(b *Baking) bool { return b.UserBakingID == id })
 }
 
 func (i *Island) AddMonster(m *Monster) {
 	i.Monsters = append(i.Monsters, m)
 }
 
-func (i *Island) RemoveEgg(userEggID int64) {
-	out := i.Eggs[:0]
-	for _, e := range i.Eggs {
-		if e.UserEggID != userEggID {
-			out = append(out, e)
-		}
-	}
-	i.Eggs = out
+func (i *Island) RemoveEgg(id int64) {
+	i.Eggs = remove(i.Eggs, func(e *Egg) bool { return e.UserEggID == id })
 }
 
-func (i *Island) RemoveStructure(userStructureID int64) {
-	out := i.Structures[:0]
-	for _, s := range i.Structures {
-		if s.UserStructureID != userStructureID {
-			out = append(out, s)
-		}
-	}
-	i.Structures = out
+func (i *Island) RemoveStructure(id int64) {
+	i.Structures = remove(i.Structures, func(s *Structure) bool { return s.UserStructureID == id })
 }
 
-func (i *Island) RemoveMonster(userMonsterID int64) {
-	out := i.Monsters[:0]
-	for _, m := range i.Monsters {
-		if m.UserMonsterID != userMonsterID {
-			out = append(out, m)
-		}
-	}
-	i.Monsters = out
+func (i *Island) RemoveMonster(id int64) {
+	i.Monsters = remove(i.Monsters, func(m *Monster) bool { return m.UserMonsterID == id })
 }
 
-func (i *Island) RemoveBreeding(userBreedingID int64) {
-	out := i.Breedings[:0]
-	for _, b := range i.Breedings {
-		if b.UserBreedingID != userBreedingID {
-			out = append(out, b)
-		}
-	}
-	i.Breedings = out
+func (i *Island) RemoveBreeding(id int64) {
+	i.Breedings = remove(i.Breedings, func(b *Breeding) bool { return b.UserBreedingID == id })
 }
 
-func (i *Island) FindBaking(userBakingID int64) *Baking {
-	for _, b := range i.Bakings {
-		if b.UserBakingID == userBakingID {
-			return b
-		}
-	}
-	return nil
-}
-
-func (i *Island) RemoveBaking(userBakingID int64) {
-	out := i.Bakings[:0]
-	for _, b := range i.Bakings {
-		if b.UserBakingID != userBakingID {
-			out = append(out, b)
-		}
-	}
-	i.Bakings = out
+func (i *Island) RemoveBaking(id int64) {
+	i.Bakings = remove(i.Bakings, func(b *Baking) bool { return b.UserBakingID == id })
 }
 
 func (i *Island) GetSFSObject() *data.GFSObject {

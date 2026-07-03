@@ -173,13 +173,15 @@ func (m *Manager) countObjects(p *Player, object int) int {
 	for _, isl := range p.Islands {
 		for _, s := range isl.Structures {
 			sid := int(s.StructureID)
-			if sid == object || m.Static.StructureEntity[sid] == object {
+			si, _ := m.Static.Structure(sid)
+			if sid == object || si.Entity == object {
 				n++
 			}
 		}
 		for _, mon := range isl.Monsters {
 			mid := int(mon.MonsterID)
-			if mid == object || m.Static.MonsterEntity[mid] == object {
+			mi, _ := m.Static.Monster(mid)
+			if mid == object || mi.Entity == object {
 				n++
 			}
 		}
@@ -208,7 +210,7 @@ func (m *Manager) countStructureType(p *Player, structureType string) int {
 	n := 0
 	for _, isl := range p.Islands {
 		for _, s := range isl.Structures {
-			if m.Static.StructureType[int(s.StructureID)] == structureType {
+			if si, _ := m.Static.Structure(int(s.StructureID)); si.Type == structureType {
 				n++
 			}
 		}
@@ -227,15 +229,6 @@ func maxMonsterLevel(p *Player) int {
 	}
 	return best
 }
-
-func activeIslandLevel(p *Player) int {
-	if p.GetActiveIsland() != nil {
-		return 30
-	}
-	return 0
-}
-
-var _ = activeIslandLevel
 
 func cmpEval(actual, target int, eval string) bool {
 	switch eval {

@@ -20,26 +20,20 @@ package db
 import "github.com/Paficent/GoFox2X/data"
 
 type StaticData struct {
-	GameSettings *data.GFSArray
-	Genes        *data.GFSArray
-	Islands      *data.GFSArray
-	Torches      *data.GFSArray
-	Monsters     *data.GFSArray
-	Structures   *data.GFSArray
-	Levels       *data.GFSArray
-	ScratchOffs  *data.GFSArray
-	Quests       *data.GFSArray
-	TimedEvents  *data.GFSArray
-
+	GameSettings    *data.GFSArray
+	Genes           *data.GFSArray
+	Islands         *data.GFSArray
+	Torches         *data.GFSArray
+	Monsters        *data.GFSArray
+	Structures      *data.GFSArray
+	Levels          *data.GFSArray
+	ScratchOffs     *data.GFSArray
+	TimedEvents     *data.GFSArray
+	StoreItems      *data.GFSArray
 	StoreGroups     *data.GFSArray
 	StoreCurrencies *data.GFSArray
-	StoreItems      *data.GFSArray
 
-	MonsterBuy          map[int]BuyInfo
-	StructureBuy        map[int]BuyInfo
-	IslandBuy           map[int]IslandBuyInfo
-	LevelXP             map[int]int
-	StructureUpgradesTo map[int]int
+	LevelXP map[int]int
 
 	QuestDefs   []*QuestDef
 	QuestByName map[string]*QuestDef
@@ -47,18 +41,14 @@ type StaticData struct {
 	QuestStatic map[int]*data.GFSObject
 	QuestOrder  []int
 
-	MonsterEntity   map[int]int
-	StructureEntity map[int]int
-	StructureType   map[int]string
-	FoodOptions     map[int][]FoodOption
-
-	breedingCombos map[[2]int][]breedCombo
-	monsterLevels  map[[2]int]LevelInfo
-
-	MineInfo     map[int]MineInfo
-	TeleportInfo map[[2]int]TeleportDest
-
 	Constants Constants
+
+	monsters       map[int]MonsterInfo
+	structures     map[int]StructureInfo
+	islands        map[int]IslandInfo
+	monsterLevels  map[[2]int]LevelInfo
+	teleports      map[[2]int]TeleportDest
+	breedingCombos map[[2]int][]breedCombo
 }
 
 func LoadStatic(db *DB) *StaticData {
@@ -66,26 +56,20 @@ func LoadStatic(db *DB) *StaticData {
 	questStatic, questOrder := loadQuestStatics(db)
 	monLevels := loadMonsterLevels(db)
 	return &StaticData{
-		GameSettings: getGameSettings(db),
-		Genes:        getGenes(db),
-		Islands:      getIslands(db),
-		Torches:      getTorchData(db),
-		Monsters:     getMonsters(db, monLevels),
-		Structures:   getStructures(db),
-		Levels:       getLevels(db),
-		ScratchOffs:  getScratchOffs(db),
-		Quests:       getQuests(db),
-		TimedEvents:  getTimedEvents(db),
-
+		GameSettings:    getGameSettings(db),
+		Genes:           getGenes(db),
+		Islands:         getIslands(db),
+		Torches:         getTorchData(db),
+		Monsters:        getMonsters(db, monLevels),
+		Structures:      getStructures(db),
+		Levels:          getLevels(db),
+		ScratchOffs:     getScratchOffs(db),
+		TimedEvents:     getTimedEvents(db),
+		StoreItems:      getStoreItems(db),
 		StoreGroups:     getStoreGroups(db),
 		StoreCurrencies: getStoreCurrencies(db),
-		StoreItems:      getStoreItems(db),
 
-		MonsterBuy:          loadMonsterBuy(db),
-		StructureBuy:        loadStructureBuy(db),
-		IslandBuy:           loadIslandBuy(db),
-		LevelXP:             loadLevelXP(db),
-		StructureUpgradesTo: loadStructureUpgrades(db),
+		LevelXP: loadLevelXP(db),
 
 		QuestDefs:   questDefs,
 		QuestByName: questByName,
@@ -93,16 +77,12 @@ func LoadStatic(db *DB) *StaticData {
 		QuestStatic: questStatic,
 		QuestOrder:  questOrder,
 
-		MonsterEntity:   loadMonsterEntity(db),
-		StructureEntity: loadStructureEntity(db),
-		StructureType:   loadStructureType(db),
-		FoodOptions:     loadFoodOptions(db),
-
-		breedingCombos: loadBreedingCombos(db),
+		monsters:       loadMonsters(db),
+		structures:     loadStructures(db),
+		islands:        loadIslands(db),
 		monsterLevels:  monLevels,
-
-		MineInfo:     loadMineInfo(db),
-		TeleportInfo: loadTeleportInfo(db),
+		teleports:      loadTeleportInfo(db),
+		breedingCombos: loadBreedingCombos(db),
 	}
 }
 

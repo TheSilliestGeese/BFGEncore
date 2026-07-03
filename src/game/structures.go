@@ -27,7 +27,7 @@ func registerStructureHandlers(m *Manager) {
 	m.HandlePlayer("gs_buy_structure", func(ctx *Context, p *Player) {
 		island := ctx.Island()
 		structureID := ctx.Int64("structure_id")
-		info, ok := static.StructureBuy[int(structureID)]
+		info, ok := static.Structure(int(structureID))
 		if !ok {
 			ctx.Fail("gs_buy_structure", "Unknown structure")
 			return
@@ -75,7 +75,7 @@ func registerStructureHandlers(m *Manager) {
 			ctx.Fail("gs_sell_structure", "Invalid structure ID")
 			return
 		}
-		if info, ok := static.StructureBuy[int(s.StructureID)]; ok {
+		if info, ok := static.Structure(int(s.StructureID)); ok {
 			p.AddProperties(int64(info.CostCoins*3/4), 0, 0, 0, 0)
 		}
 		island.RemoveStructure(usid)
@@ -165,12 +165,13 @@ func registerStructureHandlers(m *Manager) {
 			ctx.Fail("gs_start_upgrade_structure", "Already upgrading")
 			return
 		}
-		nextID := static.StructureUpgradesTo[int(s.StructureID)]
+		cur, _ := static.Structure(int(s.StructureID))
+		nextID := cur.UpgradesTo
 		if nextID == 0 {
 			ctx.Fail("gs_start_upgrade_structure", "No upgrade available")
 			return
 		}
-		cost, ok := static.StructureBuy[nextID]
+		cost, ok := static.Structure(nextID)
 		if !ok {
 			ctx.Fail("gs_start_upgrade_structure", "Upgrade data missing")
 			return
@@ -270,7 +271,7 @@ func registerStructureHandlers(m *Manager) {
 			return
 		}
 
-		if info, ok := static.StructureBuy[int(s.StructureID)]; ok && s.IsComplete != 0 {
+		if info, ok := static.Structure(int(s.StructureID)); ok && s.IsComplete != 0 {
 			if !p.Buy(int64(info.CostCoins), int64(info.CostDiamonds), int64(info.CostEth)) {
 				ctx.Fail("gs_clear_obstacle", "Not enough resources to clear obstacle")
 				return
@@ -289,7 +290,7 @@ func registerStructureHandlers(m *Manager) {
 			ctx.Fail("gs_start_obstacle", "Invalid structure ID")
 			return
 		}
-		info, ok := static.StructureBuy[int(s.StructureID)]
+		info, ok := static.Structure(int(s.StructureID))
 		if ok {
 			if !p.Buy(int64(info.CostCoins), int64(info.CostDiamonds), int64(info.CostEth)) {
 				ctx.Fail("gs_start_obstacle", "Not enough resources to clear obstacle")
@@ -347,9 +348,11 @@ func registerStructureHandlers(m *Manager) {
 	m.HandlePlayer("gs_collect_from_mine", func(ctx *Context, p *Player) {
 		island := ctx.Island()
 		var mineStructure *Structure
+		mineDiamonds := 0
 		for _, s := range island.Structures {
-			if _, ok := static.MineInfo[int(s.StructureID)]; ok {
+			if info, ok := static.Structure(int(s.StructureID)); ok && info.Mine != nil {
 				mineStructure = s
+				mineDiamonds = info.Mine.Diamonds
 				break
 			}
 		}
@@ -358,11 +361,8 @@ func registerStructureHandlers(m *Manager) {
 			return
 		}
 
-		// TODO:
-		// Timer does not reset for some reason, but at least the game does not crash
 		now := nowMS()
-		mine := static.MineInfo[int(mineStructure.StructureID)]
-		p.AddProperties(0, int64(mine.Diamonds), 0, 0, 0)
+		p.AddProperties(0, int64(mineDiamonds), 0, 0, 0)
 		ctx.Reply("gs_update_properties", data.MakeGFSObject().PutGFSArray("properties", p.GetProperties()))
 		ctx.Reply("gs_collect_from_mine", data.MakeGFSObject().PutLong("success", 1))
 		ctx.Reply("gs_update_structure", data.MakeGFSObject().

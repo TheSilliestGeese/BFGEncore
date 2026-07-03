@@ -73,7 +73,7 @@ func newPlayer(bbbID, userID int64, static *db.StaticData) *Player {
 		levelXP:      static.LevelXP,
 	}
 	castle := int64(7)
-	if info, ok := static.IslandBuy[1]; ok && info.Castle != 0 {
+	if info, ok := static.Island(1); ok && info.Castle != 0 {
 		castle = int64(info.Castle)
 	}
 	p.structureSeq = 0

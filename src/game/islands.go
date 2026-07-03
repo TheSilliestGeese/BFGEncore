@@ -38,7 +38,7 @@ func registerIslandHandlers(m *Manager) {
 				return
 			}
 		}
-		info, ok := static.IslandBuy[int(islandID)]
+		info, ok := static.Island(int(islandID))
 		if !ok {
 			ctx.Fail("gs_buy_island", "Error")
 			return

@@ -19,13 +19,6 @@ package db
 
 import "github.com/Paficent/GoFox2X/data"
 
-func getQuests(db *DB) *data.GFSArray {
-	return buildArray(db.Quests, func(r Quest) *data.GFSObject {
-		log := questLogObject(r.ID, "false", 0, r.Initial)
-		return questEntryWrap(r.ID, log, questStaticObject(r))
-	})
-}
-
 func loadQuestStatics(db *DB) (map[int]*data.GFSObject, []int) {
 	statics := map[int]*data.GFSObject{}
 	var order []int
@@ -34,26 +27,6 @@ func loadQuestStatics(db *DB) (map[int]*data.GFSObject, []int) {
 		order = append(order, r.ID)
 	}
 	return statics, order
-}
-
-func questLogObject(id int, status string, collected, isNew int) *data.GFSObject {
-	return data.MakeGFSObject().
-		PutInt("id", id).
-		PutInt("quest_id", id).
-		PutInt("user", 0).
-		PutUtfString("status", status).
-		PutInt("collected", collected).
-		PutInt("new", isNew)
-}
-
-func questEntryWrap(id int, log, static *data.GFSObject) *data.GFSObject {
-	entry := data.MakeGFSArray()
-	entry.AddSFSObject(log)
-	entry.AddSFSObject(static)
-
-	return data.MakeGFSObject().
-		PutGFSArray("new", entry).
-		PutLong("id", int64(id))
 }
 
 func questStaticObject(r Quest) *data.GFSObject {

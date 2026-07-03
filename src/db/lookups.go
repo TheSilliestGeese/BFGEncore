@@ -19,50 +19,6 @@ package db
 
 import "math/rand"
 
-type BuyInfo struct {
-	Entity       int
-	CostCoins    int
-	CostDiamonds int
-	CostEth      int
-	BuildTime    int
-	Xp           int
-}
-
-func buyInfoFromEntity(db *DB, entity int) (BuyInfo, bool) {
-	e, ok := db.entity(entity)
-	if !ok {
-		return BuyInfo{}, false
-	}
-	return BuyInfo{
-		Entity:       entity,
-		CostCoins:    e.CostCoins,
-		CostDiamonds: e.CostDiamonds,
-		CostEth:      e.CostEth,
-		BuildTime:    e.BuildTime,
-		Xp:           e.XP,
-	}, true
-}
-
-func loadMonsterBuy(db *DB) map[int]BuyInfo {
-	out := map[int]BuyInfo{}
-	for _, m := range db.Monsters {
-		if info, ok := buyInfoFromEntity(db, m.Entity); ok {
-			out[m.ID] = info
-		}
-	}
-	return out
-}
-
-func loadStructureBuy(db *DB) map[int]BuyInfo {
-	out := map[int]BuyInfo{}
-	for _, s := range db.Structures {
-		if info, ok := buyInfoFromEntity(db, s.Entity); ok {
-			out[s.ID] = info
-		}
-	}
-	return out
-}
-
 type breedCombo struct {
 	Result      int
 	Probability int
@@ -139,57 +95,10 @@ func (sd *StaticData) MonsterLevel(monsterID, level int) (LevelInfo, bool) {
 	return li, ok
 }
 
-type IslandBuyInfo struct {
-	CostCoins    int
-	CostDiamonds int
-	Castle       int
-}
-
-func loadIslandBuy(db *DB) map[int]IslandBuyInfo {
-	out := map[int]IslandBuyInfo{}
-	for _, r := range db.Islands {
-		out[r.ID] = IslandBuyInfo{
-			CostCoins:    r.CostCoins,
-			CostDiamonds: r.CostDiamonds,
-			Castle:       r.Castle,
-		}
-	}
-	return out
-}
-
 func loadLevelXP(db *DB) map[int]int {
 	out := map[int]int{}
 	for _, r := range db.Levels {
 		out[r.Level] = r.XP
-	}
-	return out
-}
-
-func loadStructureUpgrades(db *DB) map[int]int {
-	out := map[int]int{}
-	for _, r := range db.Structures {
-		if r.UpgradesTo != 0 {
-			out[r.ID] = r.UpgradesTo
-		}
-	}
-	return out
-}
-
-type MineInfo struct {
-	Time     int
-	Diamonds int
-}
-
-func loadMineInfo(db *DB) map[int]MineInfo {
-	out := map[int]MineInfo{}
-	for _, r := range db.Structures {
-		if r.Type != "mine" {
-			continue
-		}
-		out[r.ID] = MineInfo{
-			Time:     toInt(r.Extra.V["time"]),
-			Diamonds: toInt(r.Extra.V["diamonds"]),
-		}
 	}
 	return out
 }
@@ -205,4 +114,9 @@ func loadTeleportInfo(db *DB) map[[2]int]TeleportDest {
 		out[[2]int{e.SrcIsland, e.SrcMonster}] = TeleportDest{e.DestIsland, e.DestMonster}
 	}
 	return out
+}
+
+func (sd *StaticData) Teleport(island, monster int) (TeleportDest, bool) {
+	d, ok := sd.teleports[[2]int{island, monster}]
+	return d, ok
 }
