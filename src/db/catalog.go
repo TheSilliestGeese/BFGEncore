@@ -24,6 +24,7 @@ type MonsterInfo struct {
 	CostEth      int
 	BuildTime    int
 	XP           int
+	Names        []string
 }
 
 type MineInfo struct {
@@ -69,6 +70,7 @@ func loadMonsters(db *DB) map[int]MonsterInfo {
 			CostEth:      e.CostEth,
 			BuildTime:    e.BuildTime,
 			XP:           e.XP,
+			Names:        m.Names.V,
 		}
 	}
 	return out

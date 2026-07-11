@@ -89,6 +89,7 @@ func registerMonsterHandlers(m *Manager) {
 		island.RemoveEgg(userEggID)
 
 		now := nowMS()
+		info, _ := m.Static.Monster(int(egg.MonsterID))
 		monster := &Monster{
 			UserMonsterID:  p.NextMonsterID(),
 			UserIslandID:   island.UserIslandID,
@@ -99,7 +100,7 @@ func registerMonsterHandlers(m *Manager) {
 			Level:          1,
 			Happiness:      0,
 			Volume:         1,
-			Name:           "Monster",
+			Name:           randomMonsterName(info.Names),
 			DateCreated:    now,
 			LastCollection: now,
 		}

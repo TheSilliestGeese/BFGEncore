@@ -18,10 +18,18 @@
 package game
 
 import (
+	"math/rand"
 	"regexp"
 	"strings"
 	"unicode"
 )
+
+func randomMonsterName(names []string) string {
+	if len(names) == 0 {
+		return "Monster"
+	}
+	return names[rand.Intn(len(names))]
+}
 
 const nameAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!¨\"#$&'()*+,-./:;<=>?@}{0123456789|£©¿®`~^ÀÁÂÄÇÈÉÊËÌÍÎÏÑÒÓÔÖÙÚÛÜßàáâäçèéêëìíîïñòóôöùúûü_ÆæÃãÕõАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя€₽¡"
 
