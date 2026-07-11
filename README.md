@@ -4,7 +4,7 @@ A community maintained private server for the Big Fish Version of My Singing Mon
 
 This server was created to remedy the flaws of the recently publicized python server and the issues surrounding its development. It's faster, easier to extend, automates the entire process, does not rely on flawed (and seemingly controversial) libraries, and does not distribute proprietary assets.
 
-The server aims for correctness in client and server responses, without extra features. The core gameplay loop is complete and stable. However, social functions, quests, and other auxilary functions currently need imlementation. Currently about 55% of server commands are implemented and working.
+The server aims for correctness in client and server responses, without extra features. The core gameplay loop is complete and stable. However, social functions, quests, and other auxiliary functions currently need implementation. Currently about 55% of server commands are implemented and working.
 
 ## Usage
 **Before you start, you'll need:**
