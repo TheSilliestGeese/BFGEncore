@@ -95,9 +95,6 @@ type authServer struct {
 	cfg         config
 	store       *userStore
 	contentRoot string
-
-	cmdMu    sync.Mutex
-	commands []map[string]any
 }
 
 func newAuthServer(cfg config, usersPath, contentRoot string) *authServer {
@@ -108,8 +105,6 @@ func (s *authServer) handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /auth.php", s.handleAuth)
 	mux.HandleFunc("POST /verify_user", s.handleVerifyUser)
-	mux.HandleFunc("POST /command/gs_display_generic_message", s.handleDisplayMessage)
-	mux.HandleFunc("GET /commands", s.handleCommands)
 	mux.HandleFunc("GET /content/{ver}/files.json", s.handleFilesJSON)
 	mux.HandleFunc("GET /content/{ver}/{file...}", s.handleServeFile)
 	mux.HandleFunc("GET /logging_in.mp4", s.handleLoadingMP4)
@@ -223,57 +218,4 @@ func (s *authServer) handleVerifyUser(w http.ResponseWriter, r *http.Request) {
 		"ok":         true,
 		"session_id": utils.EncryptToken(string(payload), s.cfg.IV, s.cfg.Key),
 	})
-}
-
-func (s *authServer) queueDisplayMessage(message string, forceLogout bool, targetBBBID any) map[string]any {
-	cmd := map[string]any{
-		"command":       "gs_display_generic_message",
-		"payload":       map[string]any{"force_logout": forceLogout, "msg": message},
-		"target_bbb_id": targetBBBID,
-	}
-	s.cmdMu.Lock()
-	s.commands = append(s.commands, cmd)
-	s.cmdMu.Unlock()
-	return cmd
-}
-
-func (s *authServer) handleDisplayMessage(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		Message     string       `json:"message"`
-		ForceLogout bool         `json:"force_logout"`
-		BBBID       *json.Number `json:"bbb_id"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		errorResponse(w, "Invalid or missing JSON body.", http.StatusBadRequest)
-		return
-	}
-	message := strings.TrimSpace(body.Message)
-	if message == "" {
-		errorResponse(w, "Missing required field: message.", http.StatusBadRequest)
-		return
-	}
-
-	var target any
-	if body.BBBID != nil {
-		id, err := body.BBBID.Int64()
-		if err != nil {
-			errorResponse(w, "bbb_id must be an integer.", http.StatusBadRequest)
-			return
-		}
-		target = id
-	}
-
-	cmd := s.queueDisplayMessage(message, body.ForceLogout, target)
-	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "queued": true, "command": cmd})
-}
-
-func (s *authServer) handleCommands(w http.ResponseWriter, r *http.Request) {
-	s.cmdMu.Lock()
-	pending := s.commands
-	s.commands = nil
-	s.cmdMu.Unlock()
-	if pending == nil {
-		pending = []map[string]any{}
-	}
-	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "commands": pending})
 }
