@@ -105,38 +105,45 @@ func registerEconomyHandlers(m *Manager) {
 
 	m.Handle("gs_get_memory_game_numbers", func(ctx *Context) {
 		ctx.Reply("gs_get_memory_game_numbers", data.MakeGFSObject().
-			PutInt("memoryGameAudioSampleNumber", 100).
-			PutFloat("toneDuration", 2.0).
-			PutFloat("startGamePauseDuration", 2.0).
-			PutFloat("startSeqPauseDuration", 0.0).
-			PutFloat("postNotePauseDuration", 0.0).
-			PutFloat("postSwapPauseDuration", 0.5).
-			PutFloat("failPauseDuration", 1.0).
-			PutInt("swapBeginStep", -1).
-			PutFloat("monsterSwapChance", 0.5).
-			PutInt("stepDurationOfSwap", 1).
-			PutFloat("swapAnimationSpeed", 5000.0).
-			PutInt("doubleTapBeginStep", 10).
-			PutFloat("doubleTapChance", 0.5).
+			// difficulty?
 			PutInt("tier1ResponseLevel", 5).
 			PutInt("tier2ResponseLevel", 10).
 			PutInt("tier3ResponseLevel", 20).
 			PutInt("tier4ResponseLevel", 50).
+			// double tap
+			PutFloat("doubleTapChance", 0.5).
+			PutInt("doubleTapBeginStep", 10).
+			// swapping
+			PutFloat("swapAnimationSpeed", 5000.0).
+			PutInt("stepDurationOfSwap", 1).
+			PutFloat("monsterSwapChance", 0.5).
+			PutInt("swapBeginStep", -1).
+			// timing
+			PutFloat("failPauseDuration", 1.0).
+			PutFloat("postSwapPauseDuration", 0.5).
+			PutFloat("postNotePauseDuration", 0.0).
+			PutFloat("startSeqPauseDuration", 0.0).
+			PutFloat("startGamePauseDuration", 2.0).
+			// audio
+			PutFloat("toneDuration", 2.0).
 			PutInt("fixedToneDuration", 0).
-			PutInt("diamondPrice", 2).
-			PutInt("coinPrice", 0).
-			PutInt("diamondReward", 1).
-			PutInt("coinReward", 25).
-			PutInt("foodReward", 50).
-			PutInt("coinRewardFreq", 1).
-			PutInt("foodRewardFreq", 5))
+			PutInt("memoryGameAudioSampleNumber", 100).
+			// scoring
+			PutInt("topscore", 10). // TODO: actually add this with logic behind it
+			PutInt("prev_highscore", 0).
+			PutBool("success", true))
 	})
 
-	m.Handle("gs_memory_minigame_current_cost", func(ctx *Context) {
-		ctx.Reply("gs_memory_minigame_current_cost", data.MakeGFSObject().
-			PutInt("diamond_cost", 2).
-			PutInt("coin_cost", 0).
-			PutBool("success", true))
+	// TODO: Assuming that daily minigame if available would return 0?
+	m.HandleReply("gs_memory_minigame_current_cost", func(ctx *Context) *data.GFSObject {
+		//PutInt("diamond_cost", 0).
+		return data.MakeGFSObject().PutInt("diamond_cost", 2).PutInt("coin_cost", 0).PutBool("success", true)
+	})
+
+	// TODO: Assuming that daily minigame if available would return 0?
+	m.HandleReply("gs_purchase_memory_mini_game", func(ctx *Context) *data.GFSObject {
+		//PutInt("diamond_cost", 0).
+		return data.MakeGFSObject().PutInt("diamond_cost", 2).PutInt("coin_cost", 0).PutBool("success", true)
 	})
 
 	m.HandlePlayer("gs_place_on_gold_island", func(ctx *Context, p *Player) {
