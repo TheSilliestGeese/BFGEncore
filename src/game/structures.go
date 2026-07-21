@@ -176,7 +176,7 @@ func registerStructureHandlers(m *Manager) {
 			ctx.Fail("gs_start_upgrade_structure", "Upgrade data missing")
 			return
 		}
-		if !p.Buy(int64(cost.CostCoins), int64(cost.CostDiamonds), int64(cost.CostEth)) {
+		if !p.BuyInIsland(int64(cost.CostCoins), int64(cost.CostDiamonds), int64(cost.CostEth), island) {
 			ctx.Fail("gs_start_upgrade_structure", "Not enough currency")
 			return
 		}
